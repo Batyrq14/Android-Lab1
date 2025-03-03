@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.example.lab1.fragments.MainFragment"
+        android:label="Main"
+        tools:layout="@layout/fragment_main">
+        <action
+            android:id="@+id/action_main_to_intent"
+            app:destination="@id/intentFragment" />
+        <action
+            android:id="@+id/action_main_to_service"
+            app:destination="@id/serviceFragment" />
+        <action
+            android:id="@+id/action_main_to_broadcast"
+            app:destination="@id/broadcastFragment" />
+        <action
+            android:id="@+id/action_main_to_content"
+            app:destination="@id/contentFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/intentFragment"
+        android:name="com.example.lab1.fragments.IntentFragment"
+        android:label="Instagram Share"
+        tools:layout="@layout/fragment_intent" />
+
+    <fragment
+        android:id="@+id/serviceFragment"
+        android:name="com.example.lab1.fragments.ServiceFragment"
+        android:label="Music Player"
+        tools:layout="@layout/fragment_service" />
+
+    <fragment
+        android:id="@+id/broadcastFragment"
+        android:name="com.example.lab1.fragments.BroadcastFragment"
+        android:label="Broadcast Receiver"
+        tools:layout="@layout/fragment_broadcast" />
+
+    <fragment
+        android:id="@+id/contentFragment"
+        android:name="com.example.lab1.fragments.ContentFragment"
+        android:label="Calendar Events"
+        tools:layout="@layout/fragment_content" />
+</navigation>
