@@ -1,14 +1,11 @@
 package com.example.lab1.fragments
 
+import android.Manifest
 import android.content.Intent
-import android.app.NotificationChannel
-import android.app.NotificationManager
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.lab1.databinding.FragmentServiceBinding
 import com.example.lab1.service.MusicService
@@ -16,60 +13,79 @@ import com.example.lab1.service.MusicService
 class ServiceFragment : Fragment() {
     private var _binding: FragmentServiceBinding? = null
     private val binding get() = _binding!!
-//    private val STARTFOREGROUND_ACTION = "com.example.musicplayer.action.START_FOREGROUND"
-//    private val STOPFOREGROUND_ACTION = "com.example.musicplayer.action.STOP_FOREGROUND"
-    private val NOTIFICATION_CHANNEL_ID = "musicplayer_channel"
-//    private val PAUSE_ACTION = "com.example.musicplayer.action.PAUSE"
-//    private val PLAY_ACTION = "com.example.musicplayer.action.PLAY"
+
+    companion object {
+        private const val REQUEST_CODE_NOTIFICATIONS = 1001
+    }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: android.view.LayoutInflater, container: android.view.ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
+    ): android.view.View {
         _binding = FragmentServiceBinding.inflate(inflater, container, false)
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: android.view.View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         updateButtonStates()
 
         binding.btnStart.setOnClickListener {
-            Intent(requireContext(), MusicService::class.java).also { intent ->
-                intent.action = MusicService.ACTION_START
-                requireContext().startService(intent)
-                updateButtonStates()
+            // Check notification permission on Android 13+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (requireContext().checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED
+                ) {
+                    requestPermissions(
+                        arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                        REQUEST_CODE_NOTIFICATIONS
+                    )
+                } else {
+                    startMusicService()
+                }
+            } else {
+                startMusicService()
             }
         }
 
         binding.btnPause.setOnClickListener {
             Intent(requireContext(), MusicService::class.java).also { intent ->
-                if (MusicService.isPlaying) {
-                    intent.action = MusicService.ACTION_PAUSE
-                } else {
-                    intent.action = MusicService.ACTION_RESUME
-                }
-                requireContext().startService(intent)
-                updateButtonStates()
-            }
-        }
-
-        binding.btnStop.setOnClickListener {
-            Intent(requireContext(), MusicService::class.java).also { intent ->
-                intent.action = MusicService.ACTION_STOP
+                intent.action = MusicService.ACTION_PAUSE
                 requireContext().startService(intent)
                 updateButtonStates()
             }
         }
     }
 
+    private fun startMusicService() {
+        Intent(requireContext(), MusicService::class.java).also { intent ->
+            // Using ACTION_RESUME to start/resume music playback.
+            intent.action = MusicService.ACTION_RESUME
+            requireContext().startService(intent)
+            updateButtonStates()
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_NOTIFICATIONS) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startMusicService()
+            } else {
+                Toast.makeText(requireContext(), "Notification permission denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     private fun updateButtonStates() {
-        val isServiceRunning = MusicService.isPlaying
-        binding.btnStart.isEnabled = !isServiceRunning
-        binding.btnPause.isEnabled = isServiceRunning
-        binding.btnPause.text = if (isServiceRunning) "Pause" else "Resume"
-        binding.btnStop.isEnabled = isServiceRunning
+        // If music is playing, enable Pause and disable Resume; if not, enable Resume.
+        val isPlaying = MusicService.isPlaying
+        binding.btnStart.isEnabled = !isPlaying
+        binding.btnPause.isEnabled = isPlaying
+        binding.btnStart.text = "Resume"
+        binding.btnPause.text = "Pause"
     }
 
     override fun onResume() {

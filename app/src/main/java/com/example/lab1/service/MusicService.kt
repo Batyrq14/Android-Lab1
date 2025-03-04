@@ -14,8 +14,8 @@ import android.os.IBinder
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.example.lab1.MainActivity
-import java.io.IOException
 import com.example.lab1.R
+import java.io.IOException
 
 class MusicService : Service() {
     private var mediaPlayer: MediaPlayer? = null
@@ -49,7 +49,7 @@ class MusicService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when(intent?.action) {
+        when (intent?.action) {
             ACTION_START -> {
                 startMusic()
             }
@@ -79,6 +79,7 @@ class MusicService : Service() {
     }
 
     private fun resumeMusic() {
+        // If the media player is not already playing, start it.
         mediaPlayer?.start()
         isPlaying = true
         startForeground(NOTIFICATION_ID, createNotification("Playing Music"))
@@ -114,7 +115,7 @@ class MusicService : Service() {
             this, 0, stopIntent, PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Build the notification
+        // Build the notification with action buttons for pause/resume and stop
         return NotificationCompat.Builder(this, channelId)
             .setContentTitle("Music Player")
             .setContentText(status)
@@ -135,11 +136,6 @@ class MusicService : Service() {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
     }
-    private fun updateNotification() {
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
-
-        notificationManager.notify(NOTIFICATION_ID, createNotification(status = String()))
-    }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -151,7 +147,6 @@ class MusicService : Service() {
                 lightColor = Color.BLUE
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             }
-
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(serviceChannel)
         }
