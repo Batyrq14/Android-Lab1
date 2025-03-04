@@ -1,7 +1,10 @@
 package com.example.lab1.service
 
-import android.R
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.Intent
 import android.content.res.AssetFileDescriptor
 import android.graphics.Color
@@ -12,16 +15,18 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.example.lab1.MainActivity
 import java.io.IOException
+import com.example.lab1.R
 
 class MusicService : Service() {
     private var mediaPlayer: MediaPlayer? = null
-    private val channelId = "MusicServiceChannel"
+    private val channelId = "musicplayer_channel"
 
     companion object {
-        const val ACTION_START = "com.example.androidlab.action.START"
-        const val ACTION_PAUSE = "com.example.androidlab.action.PAUSE"
-        const val ACTION_RESUME = "com.example.androidlab.action.RESUME"
-        const val ACTION_STOP = "com.example.androidlab.action.STOP"
+        const val ACTION_START = "com.example.lab1.action.START"
+        const val ACTION_PAUSE = "com.example.lab1.action.PAUSE"
+        const val ACTION_RESUME = "com.example.lab1.action.RESUME"
+        const val ACTION_STOP = "com.example.lab1.action.STOP"
+        private const val NOTIFICATION_ID = 1
 
         var isPlaying = false
     }
@@ -64,19 +69,19 @@ class MusicService : Service() {
     private fun startMusic() {
         mediaPlayer?.start()
         isPlaying = true
-        startForeground(1, createNotification("Playing Music"))
+        startForeground(NOTIFICATION_ID, createNotification("Playing Music"))
     }
 
     private fun pauseMusic() {
         mediaPlayer?.pause()
         isPlaying = false
-        startForeground(1, createNotification("Paused"))
+        startForeground(NOTIFICATION_ID, createNotification("Paused"))
     }
 
     private fun resumeMusic() {
         mediaPlayer?.start()
         isPlaying = true
-        startForeground(1, createNotification("Playing Music"))
+        startForeground(NOTIFICATION_ID, createNotification("Playing Music"))
     }
 
     private fun stopMusic() {
@@ -129,6 +134,11 @@ class MusicService : Service() {
                 .setShowActionsInCompactView(0, 1))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
+    }
+    private fun updateNotification() {
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
+
+        notificationManager.notify(NOTIFICATION_ID, createNotification(status = String()))
     }
 
     private fun createNotificationChannel() {

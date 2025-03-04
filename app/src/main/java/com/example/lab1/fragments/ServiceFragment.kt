@@ -1,10 +1,14 @@
 package com.example.lab1.fragments
 
 import android.content.Intent
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import com.example.lab1.databinding.FragmentServiceBinding
 import com.example.lab1.service.MusicService
@@ -12,6 +16,11 @@ import com.example.lab1.service.MusicService
 class ServiceFragment : Fragment() {
     private var _binding: FragmentServiceBinding? = null
     private val binding get() = _binding!!
+//    private val STARTFOREGROUND_ACTION = "com.example.musicplayer.action.START_FOREGROUND"
+//    private val STOPFOREGROUND_ACTION = "com.example.musicplayer.action.STOP_FOREGROUND"
+    private val NOTIFICATION_CHANNEL_ID = "musicplayer_channel"
+//    private val PAUSE_ACTION = "com.example.musicplayer.action.PAUSE"
+//    private val PLAY_ACTION = "com.example.musicplayer.action.PLAY"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

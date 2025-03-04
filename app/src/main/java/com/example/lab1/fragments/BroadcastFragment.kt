@@ -17,25 +17,21 @@ class BroadcastFragment : Fragment() {
     private var _binding: FragmentBroadcastBinding? = null
     private val binding get() = _binding!!
 
+    // Initial status text
+    private var statusText: String = "Airplane Mode: OFF"
+
+    // BroadcastReceiver that listens for airplane mode changes and updates statusText
     private val airplaneModeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == Intent.ACTION_AIRPLANE_MODE_CHANGED) {
-                val isAirplaneModeOn = Settings.Global.getInt(
-                    context?.contentResolver,
-                    Settings.Global.AIRPLANE_MODE_ON, 0
-                ) != 0
-
-                val status = if (isAirplaneModeOn) "ON" else "OFF"
-                binding.textViewStatus.text = "Airplane Mode: $status"
-
-                Toast.makeText(
-                    context,
-                    "Airplane Mode is now $status",
-                    Toast.LENGTH_SHORT
-                ).show()
+                val isAirplaneModeOn = intent.getBooleanExtra("state", false)
+                statusText = if (isAirplaneModeOn) "Airplane Mode: ON" else "Airplane Mode: OFF"
+                // Optionally, show a toast when the state changes
+                Toast.makeText(context, statusText, Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,17 +44,17 @@ class BroadcastFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Initialize status
+        // Check current airplane mode state and update the statusText and TextView
         val isAirplaneModeOn = Settings.Global.getInt(
             requireContext().contentResolver,
             Settings.Global.AIRPLANE_MODE_ON, 0
         ) != 0
+        statusText = if (isAirplaneModeOn) "Airplane Mode: ON" else "Airplane Mode: OFF"
+        binding.textViewStatus.text = statusText
 
-        val status = if (isAirplaneModeOn) "ON" else "OFF"
-        binding.textViewStatus.text = "Airplane Mode: $status"
-
-        binding.btnOpenSettings.setOnClickListener {
-            startActivity(Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS))
+        // When the button is clicked, refresh the TextView with the latest statusText.
+        binding.btnRefresh.setOnClickListener {
+            binding.textViewStatus.text = statusText
         }
     }
 
